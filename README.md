@@ -12,9 +12,6 @@ The packages `numpy`, `pandas`, `networkx`, `matplotlib` are necessary. Default 
 python easy-mapper.py datafile
 ```
 
-## Overview (detailed)
-+ Based completely on  paper 
-
 ## History
 2019-11-03 : Github repo initiated, first version with basic functionality and options<br>
 2019-10-31 : Work started on easy-mapper<br>
