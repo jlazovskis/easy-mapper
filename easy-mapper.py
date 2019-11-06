@@ -15,13 +15,14 @@ print('done.\nReading and parsing input...',end='')
 # Description of script and arguments
 parser = argparse.ArgumentParser(
     description='Easy implementation of mapper.',
-    usage='python easy-mapper.py data [--function=f] [--intervals=i] [--overlap=o] [--ids=True/False')
+    usage='python easy-mapper.py data [--function=f] [--intervals=i] [--overlap=o] [--ids=True/False] [--out=type] [--out_opt=options]')
 parser.add_argument('datafile', type=str, help='The input file of data, each line containing coordinates separated by spaces')
 parser.add_argument('--function', type=str, default='3nearest', help='Parameter 1: The real-valued filter function that takes in the data. Default is 3 nearest neighbors.')
 parser.add_argument('--intervals', type=int, default=10, help='Parameter 2: The number of intervals for creating a cover of the range of the filter function. Default is 10.')
 parser.add_argument('--overlap', type=float, default=0.1, help='Parameter 3: The percentage overlap for successive intervals. Default is 10%.')
 parser.add_argument('--ids', type=bool, default=False, help='Whether or not there are IDs for each point in the input file. Default is False.')
-parser.add_argument('--output', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib, txt for a text file, or both for both. Default is mpl.')
+parser.add_argument('--out', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib, txt for a text file, or both for both. Default is mpl.')
+parser.add_argument('--out_opt', type=str, default='', help='Options for the output for the graph. If out=mpl, then this can be \'legend\' to turn on the legend, and \'legend,5\' to only show the first 5 elements of each cluster in the legend. Default is an empty string, and default number of elements to show is 10.')
 args = parser.parse_args()
 
 # Load input file and make dataframe of vectors
@@ -50,8 +51,8 @@ print('done.\nInput is {:g} points in {:g} dimensions\n'.format(len(data_raw), l
 # Filter step: set filter, get values, range, intervals
 from core.filter import *
 def filt(v): # MAKE OPTIONABLE LATER
-#	return projection(data,v,0)
-	return nearest(M,v,2) 
+	return projection(data,v,0)
+#	return nearest(M,v,2) 
 
 data['filt'] = [filt(i) for i in range(n)]
 f_max = max(data['filt']); f_min = min(data['filt'])
@@ -124,13 +125,13 @@ for int_index in range(args.intervals):
 
 # Output step: draw and / or write to desired format
 from core.draw import *
-do_output(args.intervals,args.overlap,args.output,simp_0,simp_1,simp_2)
+do_output(args.intervals,args.overlap,args.out,args.out_opt,data,simp_0,simp_1,simp_2)
 
 # End message
 print('(mapper) Number of clusters:  %g'%(len(simp_0)))
-if args.output == 'mpl' or args.output == 'both':
+if args.out == 'mpl' or args.out == 'both':
 	print('(mapper) Output image file:   %gint-%govl.png'%(args.intervals,round(args.overlap*100)))
-if args.output == 'txt' or args.output == 'both':
+if args.out == 'txt' or args.out == 'both':
 	print('(mapper) Output text file:    %gint-%govl'%(args.intervals,round(args.overlap*100)))	
 print('-'*40)
 exit()
