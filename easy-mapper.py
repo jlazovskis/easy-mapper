@@ -7,22 +7,10 @@ import argparse                  # parsing input argument
 import numpy as np               # storing and working with vectors
 import pandas as pd              # storing data
 from math import isclose         # fixing rounding errors
-from math import sqrt            # drawing nodes at the right size
 import itertools                 # working with lists
-import warnings                  # supressing warnings
-import networkx as nx            # creating graphs
-import matplotlib.pyplot as plt  # drawing graphs
-from matplotlib import cm        # coloring graphs
-
-from pyclustering.cluster.xmeans import xmeans
-from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
 
 # Start message 2
 print('done.\nReading and parsing input...',end='')
-
-###
-### Setup
-###
 
 # Description of script and arguments
 parser = argparse.ArgumentParser(
@@ -33,7 +21,7 @@ parser.add_argument('--function', type=str, default='3nearest', help='Parameter 
 parser.add_argument('--intervals', type=int, default=10, help='Parameter 2: The number of intervals for creating a cover of the range of the filter function. Default is 10.')
 parser.add_argument('--overlap', type=float, default=0.1, help='Parameter 3: The percentage overlap for successive intervals. Default is 10%.')
 parser.add_argument('--ids', type=bool, default=False, help='Whether or not there are IDs for each point in the input file. Default is False.')
-parser.add_argument('--output', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib or txt for a text file. Default is mpl.')
+parser.add_argument('--output', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib, txt for a text file, or both for both. Default is mpl.')
 args = parser.parse_args()
 
 # Load input file and make dataframe of vectors
@@ -59,48 +47,12 @@ for v1_ind in range(n):
 # Data message
 print('done.\nInput is {:g} points in {:g} dimensions\n'.format(len(data_raw), len(data.at[0,'vec'])) + '-'*40)
 
-###
-### Filter functions
-###
+# Filter step: set filter, get values, range, intervals
+from core.filter import *
+def filt(v): # MAKE OPTIONABLE LATER
+#	return projection(data,v,0)
+	return nearest(M,v,2) 
 
-def filt(v):
-	return nearest(v,3) # MAKE OPTIONABLE LATER
-
-# nearest: Returns the distance at which the input vector finds its num nearest neighbors in data. 
-# Returns 0 if num > |data| .
-def nearest(vec_id,num):
-	if num > n:
-		return 0
-	else:
-		return sorted(M[vec_id])[num]
-
-# density: 
-
-# eccentricity:
-
-# graph_laplacian:
-
-###
-### Clustering functions
-###
-
-def clust(vectors):
-	return kmeans(vectors) # MAKE OPTIONABLE LATER
-
-# kmeans: 
-def kmeans(sample):
-	initial_centers = kmeans_plusplus_initializer(sample, 2).initialize()
-	xmeans_instance = xmeans(sample, initial_centers, 20)
-	xmeans_instance.process()
-	return xmeans_instance.get_clusters()
-
-# slc: single linkage clustering
-
-###
-### Pipeline
-###
-
-# Filter step: get filter values, range, intervals
 data['filt'] = [filt(i) for i in range(n)]
 f_max = max(data['filt']); f_min = min(data['filt'])
 overlap_abs = args.intervals*args.overlap
@@ -122,7 +74,11 @@ for vec_ind in range(n):
 		data['intervals'][vec_ind].append(cur_ind+1)
 		intervals['members'][cur_ind+1].append(vec_ind)
 
-# Clustering step: get clusters of all intervals
+# Clustering step: set clustering functions, get clusters of all intervals
+from core.cluster import *
+def clust(vectors): # MAKE OPTIONABLE LATER
+	return cl_kmeans(vectors)
+
 intervals['clusters'] = [{} for i in range(args.intervals)]
 for int_index in range(args.intervals):	
 	current_indices = intervals['members'][int_index].copy()
@@ -145,6 +101,11 @@ for vec_index in range(n):
 				data['clusters'][vec_index].append(str(int_index) + '-' + str(key))
 				break
 
+# Pipeline message
+print('(user) Filter function:     Nearest 3 neighbors\n(user) Number of intervals: {:g}\n(user) Percent overlap:     {:.2f}'.format(args.intervals, args.overlap*100))
+print('-'*40)
+print('(mapper) Range of function:   [{:.2f},{:.2f}]\n(mapper) Length of intervals: {:.2f}'.format(f_min, f_max, interval_abs))
+
 # Simplicial complex step: create lists of simplices
 simp_0 = {}; simp_1 = []; simp_2 = [];
 for int_index in range(args.intervals):
@@ -161,60 +122,15 @@ for int_index in range(args.intervals):
 							if triple != []:
 								simp_1.append((str(int_index)+'-'+str(cluster_index), str(int_index+1)+'-'+str(cluster_2index), str(int_index+2)+'-'+str(cluster_3index)))
 
-# Pipeline message
-print('(user) Filter function:     Nearest 3 neighbors\n(user) Number of intervals: {:g}\n(user) Percent overlap:     {:.2f}'.format(args.intervals, args.overlap*100))
-print('-'*40)
-print('(mapper) Range of function:   [{:.2f},{:.2f}]\n(mapper) Length of intervals: {:.2f}'.format(f_min, f_max, interval_abs))
-
-###
-### Output to desired format
-###
-
-# output=mpl: Write to matplotlib graph
-max_cluster_size = max(list(map(lambda x: len(x), list(simp_0.values()))))
-
-# input: size of some cluster (integer)
-# output: number between 0 and 1 representing realtive size (float)
-def setsize(val):
-	return sqrt(val/max_cluster_size)
-
-# input: interval number (integer)
-# output: color representing filter value
-def setcolor(val):
-	return cm.rainbow(1-val/args.intervals)
-
-if args.output == 'mpl':
-	with warnings.catch_warnings():
-		warnings.simplefilter("ignore")
-		G = nx.Graph()
-		G.add_nodes_from(simp_0.keys())
-		G.add_edges_from(simp_1)
-		nx.draw_spring(G, 
-			node_size = [400*setsize(len(simp_0[v])) for v in simp_0.keys()], 
-			node_color = [setcolor(int(v.split('-')[0])) for v in simp_0.keys()],
-			k=0.15,
-			iterations=50)
-		plt.savefig('%gint-%govl.png'%(args.intervals,round(args.overlap*100))) 
-
-# output=txt: Write to file
-if args.output == 'txt':
-	f = open('sc-%gint-%govl'%(args.intervals,round(args.overlap*100)),'w')
-	for s0 in simp_0.keys():
-		f.write('0 ' + s0 + ' ')
-		for vec in simp_0[s0]:
-			f.write(data.at[vec,'id']+',')
-		f.write('\n')
-	for s1 in simp_1:
-		f.write('1 ' + s1[0] + ' ' + s1[1] + '\n')
-	for s2 in simp_2:
-		f.write('2 ' + s2[0] + ' ' + s2[1] + ' ' + s2[2] + '\n')
-	f.close()
+# Output step: draw and / or write to desired format
+from core.draw import *
+do_output(args.intervals,args.overlap,args.output,simp_0,simp_1,simp_2)
 
 # End message
 print('(mapper) Number of clusters:  %g'%(len(simp_0)))
-if args.output == 'mpl':
+if args.output == 'mpl' or args.output == 'both':
 	print('(mapper) Output image file:   %gint-%govl.png'%(args.intervals,round(args.overlap*100)))
-if args.output == 'txt':
+if args.output == 'txt' or args.output == 'both':
 	print('(mapper) Output text file:    %gint-%govl'%(args.intervals,round(args.overlap*100)))	
 print('-'*40)
 exit()
