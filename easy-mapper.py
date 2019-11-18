@@ -15,14 +15,18 @@ print('done.\nReading and parsing input...',end='')
 # Description of script and arguments
 parser = argparse.ArgumentParser(
     description='Easy implementation of mapper.',
-    usage='python easy-mapper.py data [--function=f] [--intervals=i] [--overlap=o] [--ids=True/False] [--out=type] [--out_opt=options]')
+    usage='python easy-mapper.py data [--filter=f] [--intervals=i] [--overlap=o] [--ids=True/False] [--out=type]')
 parser.add_argument('datafile', type=str, help='The input file of data, each line containing coordinates separated by spaces')
-parser.add_argument('--function', type=str, default='3nearest', help='Parameter 1: The real-valued filter function that takes in the data. Default is 3 nearest neighbors.')
+parser.add_argument('--filter', type=str, default='projection', help='The real-valued filter function that takes in the data. Default is projection to the 1st coordinate.')
+parser.add_argument('--filter_projection', type=int, default=0, help='Option when filter=projection, for the axis to project to. Default is 0.')
+parser.add_argument('--filter_nearest', type=int, default=3, help='Option when filter=nearest, for the number of neighbors to find. Default is 3.')
+parser.add_argument('--filter_density', type=float, default=0.5, help='Option when filter=density, for the epsilon smoothness value. Default is 0.5.')
 parser.add_argument('--intervals', type=int, default=10, help='Parameter 2: The number of intervals for creating a cover of the range of the filter function. Default is 10.')
 parser.add_argument('--overlap', type=float, default=0.1, help='Parameter 3: The percentage overlap for successive intervals. Default is 10%.')
 parser.add_argument('--ids', type=bool, default=False, help='Whether or not there are IDs for each point in the input file. Default is False.')
 parser.add_argument('--out', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib, txt for a text file, or both for both. Default is mpl.')
-parser.add_argument('--out_opt', type=str, default='', help='Options for the output for the graph. If out=mpl, then this can be \'legend\' to turn on the legend, and \'legend,5\' to only show the first 5 elements of each cluster in the legend. Default is an empty string, and default number of elements to show is 10.')
+parser.add_argument('--out_legend', type=bool, default=False, help='Whether or not to show the legend, registered only when out=mpl. Default is False.')
+parser.add_argument('--out_legend_n', type=int, default=10, help='Max number of members of each node to show, registered only when out=mpl and out_legend=True. Default is 10.')
 args = parser.parse_args()
 
 # Load input file and make dataframe of vectors
@@ -42,17 +46,27 @@ M = np.array([np.array(np.zeros(n),dtype=float) for i in range(n)])
 for v1_ind in range(n):
 	for v2_ind in range(v1_ind+1,n):
 		d = np.linalg.norm(data['vec'][v1_ind]-data['vec'][v2_ind])
-		M[v1_ind][v2_ind] = d
-		M[v2_ind][v1_ind] = d
+		M[v1_ind][v2_ind] = d; M[v2_ind][v1_ind] = d
 
 # Data message
 print('done.\nInput is {:g} points in {:g} dimensions\n'.format(len(data_raw), len(data.at[0,'vec'])) + '-'*40)
 
-# Filter step: set filter, get values, range, intervals
+# Filter step: preprocess, set filter, get values, range, intervals
 from core.filter import *
-def filt(v): # MAKE OPTIONABLE LATER
-	return projection(data,v,0)
-#	return nearest(M,v,2) 
+
+f_names = ['projection','nearest','density']; f_ind = 0; norm = 1
+try:
+	f_ind = f_names.index(args.filter)
+except:
+	pass
+if f_ind == 2:
+	norm = 1/sum(list(map(lambda y: sum(list(map(lambda x: exp(-(x**2)/args.filter_density),y))), M)))
+
+def filt(v):
+	return [
+		projection(data,v,args.filter_projection),
+		nearest(M,v,args.filter_nearest),
+		density(M,v,norm,args.filter_density)][f_ind]
 
 data['filt'] = [filt(i) for i in range(n)]
 f_max = max(data['filt']); f_min = min(data['filt'])
@@ -103,7 +117,11 @@ for vec_index in range(n):
 				break
 
 # Pipeline message
-print('(user) Filter function:     Nearest 3 neighbors\n(user) Number of intervals: {:g}\n(user) Percent overlap:     {:.2f}'.format(args.intervals, args.overlap*100))
+ff_names = [
+	'Projection to axis '+str(args.filter_projection),
+	'Nearest '+str(args.filter_nearest)+' neighbours',
+	'Density kernel with epsilon = '+str(args.filter_density)]
+print('(user) Filter function:     '+ff_names[f_ind]+'\n(user) Number of intervals: {:g}\n(user) Percent overlap:     {:.2f}'.format(args.intervals, args.overlap*100))
 print('-'*40)
 print('(mapper) Range of function:   [{:.2f},{:.2f}]\n(mapper) Length of intervals: {:.2f}'.format(f_min, f_max, interval_abs))
 
@@ -125,7 +143,7 @@ for int_index in range(args.intervals):
 
 # Output step: draw and / or write to desired format
 from core.draw import *
-do_output(args.intervals,args.overlap,args.out,args.out_opt,data,simp_0,simp_1,simp_2)
+do_output(args.intervals,args.overlap,args.out,args.out_legend,args.out_legend_n,data,simp_0,simp_1,simp_2)
 
 # End message
 print('(mapper) Number of clusters:  %g'%(len(simp_0)))
