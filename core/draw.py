@@ -21,15 +21,11 @@ def setsize(vertices,val):
 def setcolor(interval_number,val):
 	return cm.rainbow(1-val/interval_number)
 
-def do_output(interval_number,overlap_percent,out_type,out_options,data_panda,vertices,edges,faces):
-	legendq = out_options.split(',')[0]
-	legend_length = 10
-	if ',' in out_options:
-		legend_length = int(out_options.split(',')[1])
+def do_output(interval_number,overlap_percent,out_type,out_legend,out_legend_n,data_panda,vertices,edges,faces):
 	if out_type == 'mpl' or out_type == 'both':
 		with warnings.catch_warnings():
 			warnings.simplefilter("ignore")
-			if legendq == 'legend':
+			if out_legend:
 				spacing_factor = .06
 				plt.figure(figsize=(6,8+spacing_factor*len(vertices.keys())))
 			G = nx.Graph()
@@ -43,7 +39,7 @@ def do_output(interval_number,overlap_percent,out_type,out_options,data_panda,ve
 				iterations=50)
 			labels = {lab : lab for lab in vertices.keys()}
 			label_pos = {lab : pos[lab] + np.array([.065,.065]) for lab in pos.keys()}
-			if legendq == 'legend':
+			if out_legend:
 				label_pos = {lab : pos[lab] + np.array([.09,.09]) for lab in pos.keys()}
 				x_values, y_values = zip(*pos.values()); x_min = min(x_values); x_max = max(x_values); y_min = min(y_values); y_max = max(y_values)
 				legend = sorted([[len(vertices[v]),v] for v in vertices.keys()], key=lambda x: x[0])
@@ -52,10 +48,10 @@ def do_output(interval_number,overlap_percent,out_type,out_options,data_panda,ve
 				for v_ind in range(len(vertices)):
 					plt.text(x_min,y_min,legend[v_ind][1]+': ', ha='right',va='bottom',fontsize=8,alpha=.6,fontweight='bold')
 					plt.text(x_min+.05,y_min,'('+str(legend[v_ind][0])+')', ha='center',va='bottom',fontsize=8,alpha=.6)
-					if legend[v_ind][0] <= legend_length:
+					if legend[v_ind][0] <= out_legend_n:
 						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]])[1:-1], ha='left',va='bottom',fontsize=8,alpha=.6)
 					else:
-						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]][:legend_length])[1:-1]+'...', ha='left',va='bottom',fontsize=8,alpha=.6)  # first 3 labels
+						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]][:out_legend_n])[1:-1]+'...', ha='left',va='bottom',fontsize=8,alpha=.6)  # first 3 labels
 #						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]])[1:-1], ha='left',va='bottom',fontsize=8,alpha=.6)            # all labels
 					y_min += -spacing_factor
 				plt.xlim(x_min - (x_max-x_min)*.1, x_max + (x_max-x_min)*.1)
