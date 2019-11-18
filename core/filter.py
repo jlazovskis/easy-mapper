@@ -2,6 +2,20 @@
 ### Filter functions for easy-mapper
 ###
 
+## From Carlsson-Singh-Memoli paper
+
+from math import exp
+
+# density: Uses a Gaussian kernel, epsilon must be user-defined. Large epsilon means smooth sample.
+def density(distance_matrix,vec_id,normalizer,epsilon):
+	return normalizer*sum(list(map(lambda x: exp(-(x**2)/epsilon), distance_matrix[vec_id])))
+
+# eccentricity:
+
+# graph_laplacian:
+
+## Other classic filter functions
+
 # projection: Projects to a given axis
 def projection(data_panda,vec_id,axis):
 	return data_panda.at[vec_id,'vec'][axis]
@@ -13,9 +27,3 @@ def nearest(distance_matrix,vec_id,num):
 		return 0
 	else:
 		return sorted(distance_matrix[vec_id])[num]
-
-# density: 
-
-# eccentricity:
-
-# graph_laplacian:
