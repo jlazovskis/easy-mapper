@@ -31,6 +31,7 @@ There are several shortcomings to the `easy-mapper` implementation:
 + Cluster and filter functions have to be changed manually by (un)commenting code. This will be updated in later versions.
 
 ## History
+2019-11-17 : Filter option functional: project, nearest neighbors, or density.<br>
 2019-11-06 : Split main file into subfiles. Added "both" option for output (matplotlib and write to text file).<br>
 2019-11-03 (<strong>v1</strong>) : Github repo initiated, first version with basic functionality and options<br>
 2019-10-31 : Work started on easy-mapper<br>
