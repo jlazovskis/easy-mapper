@@ -21,7 +21,7 @@ def setsize(vertices,val):
 def setcolor(interval_number,val):
 	return cm.rainbow(1-val/interval_number)
 
-def do_output(prefix,interval_number,overlap_percent,out_type,out_labels,out_legend,out_legend_n,data_panda,vertices,edges,faces):
+def do_output(prefix,suffix,interval_number,overlap_percent,out_type,out_labels,out_legend,out_legend_n,data_panda,vertices,edges,faces):
 	if out_type == 'mpl' or out_type == 'both':
 		with warnings.catch_warnings():
 			warnings.simplefilter("ignore")
@@ -57,7 +57,7 @@ def do_output(prefix,interval_number,overlap_percent,out_type,out_labels,out_leg
 					label_pos = {lab : pos[lab] + np.array([.09,.09]) for lab in pos.keys()}
 				label_bg = dict(boxstyle="round", ec="white", fc="white", alpha=0.9)
 				nx.draw_networkx_labels(G,label_pos,labels,bbox=label_bg,font_size=8,alpha=.6)
-			plt.savefig(prefix+'-%g-%g.png'%(interval_number,round(overlap_percent*100)),dpi=300) 
+			plt.savefig(prefix+'-%g-%g-'%(interval_number,round(overlap_percent*100))+suffix+'.png',dpi=300) 
 	if out_type == 'txt' or out_type == 'both':
 		f = open(prefix+'-%g-%g.txt'%(interval_number,round(overlap_percent*100)),'w')
 		for s0 in vertices.keys():

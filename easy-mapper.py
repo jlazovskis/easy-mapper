@@ -146,7 +146,7 @@ for int_index in range(args.intervals):
 
 # Output step: draw and / or write to desired format
 from core.draw import *
-do_output(out_file_prefix,args.intervals,args.overlap,args.out,args.out_labels,args.out_legend,args.out_legend_n,data,simp_0,simp_1,simp_2)
+do_output(out_file_prefix,args.filter,args.intervals,args.overlap,args.out,args.out_labels,args.out_legend,args.out_legend_n,data,simp_0,simp_1,simp_2)
 
 # End message
 print('(mapper) Number of clusters:  %g'%(len(simp_0)))
