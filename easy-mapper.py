@@ -4,6 +4,7 @@
 print('easy-mapper v1\n' + '-'*40 + '\nLoading packages...',end='')
 
 import argparse                  # parsing input argument
+import ntpath                    # parsing filename
 import numpy as np               # storing and working with vectors
 import pandas as pd              # storing data
 from math import isclose         # fixing rounding errors
@@ -25,6 +26,7 @@ parser.add_argument('--intervals', type=int, default=10, help='Parameter 2: The 
 parser.add_argument('--overlap', type=float, default=0.1, help='Parameter 3: The percentage overlap for successive intervals. Default is 10%.')
 parser.add_argument('--ids', type=bool, default=False, help='Whether or not there are IDs for each point in the input file. Default is False.')
 parser.add_argument('--out', type=str, default='mpl', help='Type of output for the graph, can be mpl for matplotlib, txt for a text file, or both for both. Default is mpl.')
+parser.add_argument('--out_labels', type=bool, default=False, help='Whether or not to show labels on the vertices, registered only when out=mpl. Default is False.')
 parser.add_argument('--out_legend', type=bool, default=False, help='Whether or not to show the legend, registered only when out=mpl. Default is False.')
 parser.add_argument('--out_legend_n', type=int, default=10, help='Max number of members of each node to show, registered only when out=mpl and out_legend=True. Default is 10.')
 args = parser.parse_args()
@@ -38,7 +40,8 @@ if args.ids:
 if not args.ids:
 	data_raw = list(map(lambda x: np.array(list(map(lambda y: float(y), x[:-2].split(' '))),dtype=float), f.readlines()))
 	data = pd.DataFrame([[str(i),data_raw[i]] for i in range(len(data_raw))], columns = ['id','vec'])
-f.close() 
+f.close()
+out_file_prefix = ntpath.basename(args.datafile).split('.')[0]
 
 # Create distance matrix
 n = len(data_raw)
@@ -58,7 +61,7 @@ f_names = ['projection','nearest','density']; f_ind = 0; norm = 1
 try:
 	f_ind = f_names.index(args.filter)
 except:
-	pass
+	print('(mapper) Unable to use input filter \''+args.filter+'\', using default.')
 if f_ind == 2:
 	norm = 1/sum(list(map(lambda y: sum(list(map(lambda x: exp(-(x**2)/args.filter_density),y))), M)))
 
@@ -143,13 +146,13 @@ for int_index in range(args.intervals):
 
 # Output step: draw and / or write to desired format
 from core.draw import *
-do_output(args.intervals,args.overlap,args.out,args.out_legend,args.out_legend_n,data,simp_0,simp_1,simp_2)
+do_output(out_file_prefix,args.intervals,args.overlap,args.out,args.out_labels,args.out_legend,args.out_legend_n,data,simp_0,simp_1,simp_2)
 
 # End message
 print('(mapper) Number of clusters:  %g'%(len(simp_0)))
 if args.out == 'mpl' or args.out == 'both':
-	print('(mapper) Output image file:   %gint-%govl.png'%(args.intervals,round(args.overlap*100)))
+	print('(mapper) Output image file:   '+out_file_prefix+'-%g-%g-'%(args.intervals,round(args.overlap*100))+args.filter+'.png')
 if args.out == 'txt' or args.out == 'both':
-	print('(mapper) Output text file:    %gint-%govl'%(args.intervals,round(args.overlap*100)))	
+	print('(mapper) Output text file:    '+out_file_prefix+'-%g-%g'%(args.intervals,round(args.overlap*100)))	
 print('-'*40)
 exit()
