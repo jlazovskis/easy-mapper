@@ -30,7 +30,17 @@ Usage with more options is possible, with the following arguments:
 + `--out_legend_n`
 
 ### Examples
-<img src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png"/>
+A sample of 500 points from a circle, with noise, is included in `examples/circle.txt`. The points are sampled as below:
+<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png"/>
+
+Calling `easy-mapper` is straightforward, and produces the following informational output:
+<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/terminal-example.png"/>
+
+The output is a file called `circle-10-10-projection.png`, referenceing the default settings of 10 intervals, 10% overlap, and projection to the first axis as a filter.
+<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-projection.png"/>
+
+Running the same command with the flag `--filter=density` produces the following result:
+<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-density.png"/>
 
 ### Caveats
 There are several shortcomings to the `easy-mapper` implementation:
