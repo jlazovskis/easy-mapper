@@ -31,16 +31,18 @@ Usage with more options is possible, with the following arguments:
 
 ### Examples
 A sample of 500 points from a circle, with noise, is included in `examples/circle.txt`. The points are sampled as below:
-<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png"/>
+<p align="center"><img height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png"/></p>
 
 Calling `easy-mapper` is straightforward, and produces the following informational output:
-<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/terminal-example.png"/>
+<p align="center"><img height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/terminal-example.png"/></p>
 
 The output is a file called `circle-10-10-projection.png`, referenceing the default settings of 10 intervals, 10% overlap, and projection to the first axis as a filter.
-<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-projection.png"/>
+<p align="center"><img height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-projection.png"/></p>
 
-Running the same command with the flag `--filter=density` produces the following result:
-<img style="text-align:center;" height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-density.png"/>
+This reflects the circle's geometry. The two vertices of degree 3 are at the ends, where the clustering part wants to find at least two clusters. Running the same command with the flag `--filter=density` produces the following result:
+<p align="center"><img height="200" src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle-10-10-density.png"/></p>
+
+This also reflects the geometry of the input.
 
 ### Caveats
 There are several shortcomings to the `easy-mapper` implementation:
