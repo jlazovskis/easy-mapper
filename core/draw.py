@@ -36,6 +36,10 @@ def do_output(prefix,suffix,interval_number,overlap_percent,out_type,out_labels,
 				k=0.15,
 				iterations=50)
 			if out_legend:
+				try:
+					vertices_idd = {v : list(map(lambda x: int(data_panda.at[x,'id']), vertices[v])) for v in vertices.keys()}
+				except:
+					vertices_idd = {v : list(map(lambda x: data_panda.at[x,'id'], vertices[v])) for v in vertices.keys()}
 				x_values, y_values = zip(*pos.values()); x_min = min(x_values); x_max = max(x_values); y_min = min(y_values); y_max = max(y_values)
 				legend = sorted([[len(vertices[v]),v] for v in vertices.keys()], key=lambda x: x[0])
 				legend.reverse()
@@ -44,9 +48,9 @@ def do_output(prefix,suffix,interval_number,overlap_percent,out_type,out_labels,
 					plt.text(x_min,y_min,legend[v_ind][1]+': ', ha='right',va='bottom',fontsize=8,alpha=.6,fontweight='bold')
 					plt.text(x_min+.05,y_min,'('+str(legend[v_ind][0])+')', ha='center',va='bottom',fontsize=8,alpha=.6)
 					if legend[v_ind][0] <= out_legend_n:
-						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]])[1:-1], ha='left',va='bottom',fontsize=8,alpha=.6)
+						plt.text(x_min+.12,y_min,str(vertices_idd[legend[v_ind][1]])[1:-1], ha='left',va='bottom',fontsize=8,alpha=.6)
 					else:
-						plt.text(x_min+.12,y_min,str(vertices[legend[v_ind][1]][:out_legend_n])[1:-1]+'...', ha='left',va='bottom',fontsize=8,alpha=.6)
+						plt.text(x_min+.12,y_min,str(vertices_idd[legend[v_ind][1]][:out_legend_n])[1:-1]+'...', ha='left',va='bottom',fontsize=8,alpha=.6)
 					y_min += -spacing_factor
 				plt.xlim(x_min - (x_max-x_min)*.1, x_max + (x_max-x_min)*.1)
 				plt.ylim(y_min, y_max + (y_max-y_min)*.1)
