@@ -30,7 +30,7 @@ Usage with more options is possible, with the following arguments:
 + `--out_legend_n`
 
 ### Examples
-<img src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png?sanitize=true&raw=true"/>
+<img src="https://raw.githubusercontent.com/jlazovskis/easy-mapper/master/examples/circle.png"/>
 
 ### Caveats
 There are several shortcomings to the `easy-mapper` implementation:
