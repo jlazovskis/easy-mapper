@@ -22,6 +22,7 @@ parser.add_argument('--filter', type=str, default='projection', help='The real-v
 parser.add_argument('--filter_projection', type=int, default=0, help='Option when filter=projection, for the axis to project to. Default is 0.')
 parser.add_argument('--filter_nearest', type=int, default=3, help='Option when filter=nearest, for the number of neighbors to find. Default is 3.')
 parser.add_argument('--filter_density', type=float, default=0.5, help='Option when filter=density, for the epsilon smoothness value. Default is 0.5.')
+parser.add_argument('--filter_eccentricity', type=int, default=1, help='Option when filter=eccentricity, for the p-value, an integer >= 1. Default is 1.')
 parser.add_argument('--intervals', type=int, default=10, help='Parameter 2: The number of intervals for creating a cover of the range of the filter function. Default is 10.')
 parser.add_argument('--overlap', type=float, default=0.1, help='Parameter 3: The percentage overlap for successive intervals. Default is 10%.')
 parser.add_argument('--ids', type=bool, default=False, help='Whether or not there are IDs for each point in the input file. Default is False.')
@@ -57,7 +58,7 @@ print('done.\nInput is {:g} points in {:g} dimensions\n'.format(len(data_raw), l
 # Filter step: preprocess, set filter, get values, range, intervals
 from core.filter import *
 
-f_names = ['projection','nearest','density']; f_ind = 0; norm = 1
+f_names = ['projection','nearest','density','eccentricity']; f_ind = 0; norm = 1
 try:
 	f_ind = f_names.index(args.filter)
 except:
@@ -69,7 +70,8 @@ def filt(v):
 	return [
 		projection(data,v,args.filter_projection),
 		nearest(M,v,args.filter_nearest),
-		density(M,v,norm,args.filter_density)][f_ind]
+		density(M,v,norm,args.filter_density),
+		eccentricity(M,v,args.filter_eccentricity)][f_ind]
 
 data['filt'] = [filt(i) for i in range(n)]
 f_max = max(data['filt']); f_min = min(data['filt'])
@@ -123,7 +125,8 @@ for vec_index in range(n):
 ff_names = [
 	'Projection to axis '+str(args.filter_projection),
 	'Nearest '+str(args.filter_nearest)+' neighbours',
-	'Density kernel with epsilon = '+str(args.filter_density)]
+	'Density kernel with epsilon = '+str(args.filter_density),
+	'Eccentricity function with p = '+str(args.filter_eccentricity)]
 print('(user) Filter function:     '+ff_names[f_ind]+'\n(user) Number of intervals: {:g}\n(user) Percent overlap:     {:.2f}'.format(args.intervals, args.overlap*100))
 print('-'*40)
 print('(mapper) Range of function:   [{:.2f},{:.2f}]\n(mapper) Length of intervals: {:.2f}'.format(f_min, f_max, interval_abs))

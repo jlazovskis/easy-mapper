@@ -15,15 +15,16 @@ A `.png` file will be created in your current directory that visualizes the data
 
 ### Basic arguments
 Usage with more options is possible, with the following arguments:
-+ `--filter=projection` : Type of filter function to use.
++ `--filter=projection` : Type of filter function to use. Options are `projection`, `nearest`, `density`, `eccentricity`.
 + `--intervals=10` : Number of intervals to use.
 + `--overlap=0.1` : Overlap percentage from one interval to the next.
 + `--out='mpl'` : Type of output. Default is an image made by `matplotlib`, also `'txt'` can be used for a text file output.
 
 ### Extended arguments
-+ `--filter_projection`
-+ `--filter_nearest`
-+ `--filter_density`
++ `--filter_projection` : Dimension on which to project. Integer at least `0`, default is `0`.
++ `--filter_nearest` : Number of nearest neghbors to take. Integer at least `1`, default is `3`.
++ `--filter_density` : Epsilon parameter for smoothness. Assumes Gaussian distribution. Positive float, default is `0.5`.
++ `--filter_eccentricity` : Exponent of terms in a sum and of the whole sum. Integer at least `1`, default is `1`.
 + `--ids` : Only relevant for the `--output='txt'` option. If `--ids=True`, then the input file is assumed to have a first column that holds the name for the vector on that line. The ids are printed in the output text file, and can be useful for making finer graphs. 
 + `--out_labels`
 + `--out_legend`
@@ -51,6 +52,7 @@ There are several shortcomings to the `easy-mapper` implementation:
 + No way to use custom filter function except by changing the code. Goal is to use auxiliary file containing filter function as input.
 
 ## History
+2020-01-20 : Added eccentricity filter function.<br>
 2019-11-19 : Added example of circle. Renamed output file. User messaged if filter is unrecognized.<br>
 2019-11-17 : Filter option functional: projection, nearest neighbors, or density.<br>
 2019-11-06 : Split main file into subfiles. Added "both" option for output (matplotlib and write to text file).<br>

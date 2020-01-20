@@ -11,6 +11,8 @@ def density(distance_matrix,vec_id,normalizer,epsilon):
 	return normalizer*sum(list(map(lambda x: exp(-(x**2)/epsilon), distance_matrix[vec_id])))
 
 # eccentricity:
+def eccentricity(distance_matrix,vec_id,p):
+	return (sum(list(map(lambda x: x**p, distance_matrix[vec_id])))/len(distance_matrix))**(1/p)
 
 # graph_laplacian:
 
